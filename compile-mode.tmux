@@ -1,16 +1,16 @@
 #!/usr/bin/env bash
 
-CURRENT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# compile-mode.tmux
+#
+# Minimal tmux plugin for running compile commands in a dedicated pane.
 
-# Default options
-default_key="C-c C-c"
-default_height="30%"
-default_history_file="$HOME/.tmux-compile-history"
+CURRENT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 get_tmux_option() {
     local option=$1
     local default_value=$2
-    local option_value=$(tmux show-option -gqv "$option")
+    local option_value
+    option_value=$(tmux show-option -gqv "$option")
     if [ -z "$option_value" ]; then
         echo "$default_value"
     else
@@ -18,30 +18,29 @@ get_tmux_option() {
     fi
 }
 
-# Get user configuration
-key=$(get_tmux_option "@compile-mode-key" "$default_key")
-height=$(get_tmux_option "@compile-mode-height" "$default_height")
-history_file=$(get_tmux_option "@compile-mode-history-file" "$default_history_file")
+# Read configuration
+compile_key=$(get_tmux_option "@compile-mode-key" "C-b")
+recompile_key=$(get_tmux_option "@compile-mode-recompile-key" "C-r")
+kill_key=$(get_tmux_option "@compile-mode-kill-key" "C-k")
+height=$(get_tmux_option "@compile-mode-height" "30%")
+history_file=$(get_tmux_option "@compile-mode-history-file" "$HOME/.tmux-compile-history")
 
-# Export variables for scripts to use
+# Export configuration
 tmux set-environment -g TMUX_COMPILE_HEIGHT "$height"
 tmux set-environment -g TMUX_COMPILE_HISTORY "$history_file"
 
-# Bind the compile command
-tmux bind-key "$key" run-shell "$CURRENT_DIR/scripts/compile.sh"
+# Bind keys
+tmux bind-key "$compile_key" run-shell "$CURRENT_DIR/scripts/compile.sh"
+tmux bind-key "$recompile_key" run-shell "$CURRENT_DIR/scripts/recompile.sh"
+tmux bind-key "$kill_key" run-shell "$CURRENT_DIR/scripts/kill-compile.sh"
 
-# Bind recompile (C-c C-r) to run last command
-tmux bind-key "C-b C-r" run-shell "$CURRENT_DIR/scripts/recompile.sh"
-
-# Bind to close compile pane (C-c C-k)
-tmux bind-key "C-b C-k" run-shell "$CURRENT_DIR/scripts/kill-compile.sh"
-
-# Bind to focus compile pane and enter copy mode (C-c C-o)
-tmux bind-key "C-b C-o" run-shell "$CURRENT_DIR/scripts/focus-compile.sh"
-
-# Bind to jump to next error (C-c C-n)
-tmux bind-key "C-b C-n" run-shell "$CURRENT_DIR/scripts/next-error.sh"
-
-# In copy-mode in compile pane, bind Enter to jump to error in Neovim
-tmux bind-key -T copy-mode-vi "Enter" run-shell "$CURRENT_DIR/scripts/jump-to-error.sh"
-tmux bind-key -T copy-mode "Enter" run-shell "$CURRENT_DIR/scripts/jump-to-error.sh"
+# When in copy-mode inside the compile pane, pressing <Enter> will copy the
+# current selection and, if it looks like a compiler error referencing a
+# source file, open that file in the neighbouring pane running Neovim.  The
+# default key can be overridden via `@compile-mode-open-file-key`.
+open_file_key=$(get_tmux_option "@compile-mode-open-file-key" "Enter")
+# Bind to both vi and emacs copy-mode tables.  The helper script will
+# gracefully fall back to the default copy behaviour when run outside the
+# compile pane.
+tmux bind-key -T copy-mode-vi "$open_file_key" run-shell "$CURRENT_DIR/scripts/open-compile-file.sh"
+tmux bind-key -T copy-mode "$open_file_key" run-shell "$CURRENT_DIR/scripts/open-compile-file.sh"
