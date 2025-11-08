@@ -33,10 +33,13 @@ line_text=$(echo "$line_text" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//
 
 # Parse: path:line:col ...  or  path:line ...
 file=""; line=""; col=""
-if [[ "$line_text" =~ ^([^:[:space:]]+):([0-9]+):([0-9]+) ]]; then
-  file="${BASH_REMATCH[1]}"; line="${BASH_REMATCH[2]}"; col="${BASH_REMATCH[3]}"
-elif [[ "$line_text" =~ ^([^:[:space:]]+):([0-9]+) ]]; then
-  file="${BASH_REMATCH[1]}"; line="${BASH_REMATCH[2]}"
+if [[ "$line_text" =~ ^([[:alnum:]_./-]+):([0-9]+):([0-9]+) ]]; then
+  file="${BASH_REMATCH[1]}"
+  line="${BASH_REMATCH[2]}"
+  col="${BASH_REMATCH[3]}"
+elif [[ "$line_text" =~ ^([[:alnum:]_./-]+):([0-9]+) ]]; then
+  file="${BASH_REMATCH[1]}"
+  line="${BASH_REMATCH[2]}"
 fi
 
 # Leave copy-mode; if nothing parsed, do nothing further
