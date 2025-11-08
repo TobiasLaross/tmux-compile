@@ -31,13 +31,33 @@ fi
 line_text=$(tmux capture-pane -p -J -t "$current_pane" -S "$cursor_y" -E "$cursor_y" 2>/dev/null || echo "")
 line_text=$(echo "$line_text" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
 
-# Parse: path:line:col ...  or  path:line ...
-file=""; line=""; col=""
-if [[ "$line_text" =~ ^([[:alnum:]_./-]+):([0-9]+):([0-9]+) ]]; then
+# Match various compiler formats:
+#   --> path:line:col   (Rust)
+#   path:line:col       (Go/TypeScript)
+#   path:line           (Go/TypeScript)
+#   path(line, col)     (Nim)
+#   path(line)          (Nim)
+if [[ "$line_text" =~ ^[[:space:]]*--\>[[:space:]]*([[:alnum:]_./-]+):([0-9]+):([0-9]+) ]]; then
+  # Rust: --> src/main.rs:514:3
   file="${BASH_REMATCH[1]}"
   line="${BASH_REMATCH[2]}"
   col="${BASH_REMATCH[3]}"
-elif [[ "$line_text" =~ ^([[:alnum:]_./-]+):([0-9]+) ]]; then
+elif [[ "$line_text" =~ ^([[:alnum:]_./-]+):([0-9]+):([0-9]+) ]]; then
+  # Common: src/file.ts:12:3
+  file="${BASH_REMATCH[1]}"
+  line="${BASH_REMATCH[2]}"
+  col="${BASH_REMATCH[3]}"
+elif [[ "$line_text" =~ ^([[:alnum:]_./-]+):([0-9]+)$ ]]; then
+  # Common: src/file.ts:12
+  file="${BASH_REMATCH[1]}"
+  line="${BASH_REMATCH[2]}"
+elif [[ "$line_text" =~ ^([[:alnum:]_./-]+)\(([0-9]+),[[:space:]]*([0-9]+)\) ]]; then
+  # Nim: /path/to/file.nim(47, 1)
+  file="${BASH_REMATCH[1]}"
+  line="${BASH_REMATCH[2]}"
+  col="${BASH_REMATCH[3]}"
+elif [[ "$line_text" =~ ^([[:alnum:]_./-]+)\(([0-9]+)\) ]]; then
+  # Nim: /path/to/file.nim(47)
   file="${BASH_REMATCH[1]}"
   line="${BASH_REMATCH[2]}"
 fi
@@ -70,5 +90,8 @@ if [ -n "$line" ]; then
 else
   tmux send-keys -t "$target_pane" ":e ${full_path}" Enter
 fi
+
+# Switch focus to the Neovim pane
+tmux select-pane -t "$target_pane" 2>/dev/null || true
 
 exit 0

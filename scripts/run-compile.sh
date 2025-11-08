@@ -67,6 +67,7 @@ fi
 
 # Keep the pane open so output remains visible for inspection
 # User must press Enter to close, giving time to navigate errors
+tmux copy-mode -t "$TMUX_PANE" 2>/dev/null || true
 read -r -p "Press Enter to close..."
 WRAPPER_EOF
 chmod +x "$wrapper"
