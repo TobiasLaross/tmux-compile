@@ -23,11 +23,11 @@ compile_key=$(get_tmux_option "@compile-mode-key" "C-b")
 recompile_key=$(get_tmux_option "@compile-mode-recompile-key" "C-r")
 kill_key=$(get_tmux_option "@compile-mode-kill-key" "C-k")
 height=$(get_tmux_option "@compile-mode-height" "30%")
-history_file=$(get_tmux_option "@compile-mode-history-file" "$HOME/.tmux-compile-history")
+base_history_dir=$(get_tmux_option "@compile-mode-history-dir" "$HOME/.tmux-compile-history")
 
 # Export configuration
 tmux set-environment -g TMUX_COMPILE_HEIGHT "$height"
-tmux set-environment -g TMUX_COMPILE_HISTORY "$history_file"
+tmux set-environment -g TMUX_COMPILE_HISTORY_DIR "$base_history_dir"
 
 # Bind keys
 tmux bind-key "$compile_key" run-shell "$CURRENT_DIR/scripts/compile.sh"
