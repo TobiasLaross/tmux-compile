@@ -25,7 +25,7 @@ kill_key=$(get_tmux_option "@compile-mode-kill-key" "C-k")
 height=$(get_tmux_option "@compile-mode-height" "30%")
 
 # default (single file history)
-compile_mode_history_file=$(get_tmux_option "@compile-mode-history-file" "$HOME/.tmux-compile-history")
+history_file=$(get_tmux_option "@compile-mode-history-file" "$HOME/.tmux-compile-history")
 
 # opt-in session mode
 session_history_enabled=$(get_tmux_option "@compile-mode-session-history" "off")
@@ -33,8 +33,8 @@ base_history_dir=$(get_tmux_option "@compile-mode-history-dir" "$HOME/.tmux-comp
 
 # Export configuration
 tmux set-environment -g TMUX_COMPILE_HEIGHT "$height"
+tmux set-environment -g TMUX_COMPILE_HISTORY "$history_file"
 tmux set-environment -g TMUX_COMPILE_HISTORY_DIR "$base_history_dir"
-tmux set-environment -g TMUX_COMPILE_HISTORY_FILE "$compile_mode_history_file"
 tmux set-environment -g TMUX_COMPILE_SESSION_HISTORY_ENABLED "$session_history_enabled"
 
 # Bind keys
