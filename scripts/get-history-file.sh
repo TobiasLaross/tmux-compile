@@ -2,7 +2,7 @@
 
 # scripts/get-history-file.sh
 #
-# Returns the session-aware history file path
+# Returns the shared history file or session-aware history file path if enabled
 
 set -euo pipefail
 
