@@ -78,8 +78,14 @@ set -g @compile-mode-kill-key "C-x"
 # Set compile pane height
 set -g @compile-mode-height "25%"
 
-# Set custom base directory for history files
-set -g @compile-mode-history-dir "$HOME/.compile-history"
+# Set custom history file location
+set -g @compile-mode-history-file "$HOME/.compile-history"
+
+# Enable history file per session
+set -g @compile-mode-session-history 'on'
+
+# Set custom base directory for history files for history per session
+set -g @compile-mode-history-dir "$HOME/.compile-history-dir"
 
 # Change the file open keybinding (in copy-mode)
 set -g @compile-mode-open-file-key "o"
