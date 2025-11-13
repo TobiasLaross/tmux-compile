@@ -52,7 +52,7 @@ When you trigger the compile command, you'll be prompted to enter a compilation 
 ### Command History
 
 By default, `tmux-compile` stores all compile commands in a single history file:
-You can enable session-aware mode, then each tmux session maintains its own compile history file inside the configured directory.
+Enabling session-aware mode creates one history file per tmux session. Each file is named after the tmux session (for example, $COMPILE_HISTORY_DIR/my-session.history). Use @compile-mode-history-dir to change the directory.
 
 ### Error Navigation
 
